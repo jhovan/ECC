@@ -54,7 +54,7 @@ class Punto:
         p1 = Punto(p1.x % n,p1.y % n)
         p2 = Punto(p2.x % n,p2.y % n)
         if p1.x != p2.x:
-            print("p1 != p2")
+            #print("p1 != p2")
             divisor = (p2.x - p1.x) % n
             mcd,inverso,_ = euclidesExtendido(divisor,n)
             inverso %= n
@@ -64,7 +64,7 @@ class Punto:
             if p1.y == (-p2.y)%n:
                 print("p1 != p2")
                 return Punto()
-            print("p1 == p2")
+            #print("p1 == p2")
             divisor = (2*p1.y) % n
             mcd,inverso,_ = euclidesExtendido(divisor,n)
             inverso %= n
@@ -75,7 +75,7 @@ class Punto:
             return None
         x3 = (pow(aux,2,n) - p1.x - p2.x) % n
         y3 = (aux * (p1.x - x3) - p1.y) % n
-        print(str(p1) + "+" + str(p2) + "=" + str(Punto(x3,y3)))
+        #print(str(p1) + "+" + str(p2) + "=" + str(Punto(x3,y3)))
         return Punto(x3,y3) 
 
     def __neg__(self):
@@ -97,13 +97,16 @@ class Punto:
 
     # n*p optimizado
     def __rmul__(self,n):
+        print("n = " + str(n))
         if n < 0:
             return (-n) * (-self)
         elif n == 0:
             return Punto()
+        elif n == 2:
+            return self + self
         else:
             if n % 2 == 0:
-                return 2 * ((n / 2) * self)
+                return 2 * ((n // 2) * self)
             return 2 * ((n // 2) * self) + self
 
         
