@@ -42,7 +42,6 @@ class Punto:
             return "0"
         return "(" + str(self.x) + "," + str(self.y) + ")"
     
-    #asumimos que n es primo
     def __add__(p1, p2):
         #Evalua los casos en los que p1 o p2 es el punto en el infinito
         if p1.inf == True:
@@ -51,25 +50,25 @@ class Punto:
             return p1
         n = Punto.curva.n
         a = Punto.curva.a
-        if p1.x != p2.x:
+        if p1.x != p2.x or p1.y != p2.y:
             divisor = (p2.x - p1.x) % n
-            _,inverso,_ = euclidesExtendido(divisor,n)
+            mcd,inverso,_ = euclidesExtendido(divisor,n)
             inverso %= n
             aux = (p2.y - p1.y)*inverso % n
-            x3 = pow(aux,2,n) - p1.x - p2.x
-            y3 = - p1.y + aux*(p1.x-x3)
         else:
             # Si p1 = -p2 regresa el punto en el infinito
-            if p1.y == (-p2.y)%n:
+            if p1.x == p2.x and p1.y == (-p2.y)%n:
                 return Punto()
             divisor = 2*p1.y % n
-            _,inverso,_ = euclidesExtendido(divisor,n)
+            mcd,inverso,_ = euclidesExtendido(divisor,n)
             inverso %= n
             aux = (3*pow(p1.x,2,n) + a)*inverso % n
-            x3 = pow(aux,2,n) - 2*p1.x
-            y3 = - p1.y + aux*(p1.x-x3)
-        x3 %= n
-        y3 %= n
+        if mcd != 1:
+            #raise Exception(str(divisor) + " no tiene inverso, mcd(" + str(divisor) + "," + str(n) + ") es " + str(mcd))
+            print(str(divisor) + " no tiene inverso, mcd(" + str(divisor) + "," + str(n) + ") es " + str(mcd))
+            return None
+        x3 =(pow(aux,2,n)-p1.x-p2.x) % n
+        y3 = (aux * (p1.x-x3) - p1.y) % n
         return Punto(x3,y3) 
 
     def __neg__(self):
@@ -83,11 +82,11 @@ class Punto:
     # n*p
     def __pow__(self,n):
         if n < 0:
-            return - p + (p**(n+1)) 
+            return - self + (self**(n+1)) 
         elif n == 0:
             return Punto()
         else:
-            return p + (p**(n-1))
+            return self + (self**(n-1))
         
 
 def pgpc(p,q):
@@ -129,9 +128,14 @@ b = Punto(11,12)
 print((a**(-7))+b)
 
 Punto.curva = Curva(1,1,35)
-p = Punto(0,1)
+p = Punto(15,-4)
 print(p)
 print(p**2)
 print(p**3)
+print(((p**2)**2))
+Punto.curva = Curva(1,1,5)
+print(p**3)
 print(p**4)
-print(p**5)
+Punto.curva = Curva(1,1,7)
+print(p**3)
+print(p**4)
