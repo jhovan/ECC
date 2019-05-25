@@ -15,10 +15,18 @@ def euclidesExtendido(a,b):
     y = x1 - (a//b) * y1
     return d, x, y
 
+# regresa una lista los factores de n
+def factores(n):
+    lista = []
+    for i in range(1,n+1):
+        if n % i == 0:
+            lista.append(i)
+    return lista
 
+# clase Curva, que representa una curva eliptica
+# con la forma  y^2 = x^3 + ax + b
 class Curva:
 
-    #y^2 = x^3 + ax + b
     def __init__(self,a,b,n):
         self.a = a
         self.b = b
@@ -28,10 +36,13 @@ class Curva:
         return "y^2 = x^3 + " + str(self.a) + "x + " + str(self.b) + " mod " + str(self.n)
     
 
+# clase Punto que representa puntos en una curva eliptica
 class Punto:
 
     curva = Curva(1,9,17)
 
+    # constructor de la clase
+    # si se omiten las coordenadas, devuelve un punto en el infinito
     def __init__(self,x = None, y = None):
         n =  Punto.curva.n 
         self.x = x 
@@ -43,6 +54,8 @@ class Punto:
             return "0"
         return "(" + str(self.x) + "," + str(self.y) + ")"
     
+    # devuelve la suma de dos puntos de la curva
+    # usa las formulas vistas en clase
     def __add__(p1, p2):
         #Evalua los casos en los que p1 o p2 es el punto en el infinito
         if p1.inf == True:
@@ -56,48 +69,43 @@ class Punto:
         if p1.x != p2.x:
             #print("p1 != p2")
             divisor = (p2.x - p1.x) % n
+            #print("lambda = " + str(divisor))
             mcd,inverso,_ = euclidesExtendido(divisor,n)
             inverso %= n
             aux = ((p2.y - p1.y)*inverso) % n
         else:
             # Si p1 = -p2 regresa el punto en el infinito
             if p1.y == (-p2.y)%n:
-                print("p1 != p2")
+                #print("p1 == -p2")
                 return Punto()
             #print("p1 == p2")
             divisor = (2*p1.y) % n
+            #print("lambda = " + str(divisor))
             mcd,inverso,_ = euclidesExtendido(divisor,n)
             inverso %= n
             aux = ((3*pow(p1.x,2,n) + a)*inverso) % n
         if mcd != 1:
             #raise Exception(str(divisor) + " no tiene inverso, mcd(" + str(divisor) + "," + str(n) + ") es " + str(mcd))
-            print(str(divisor) + " no tiene inverso, mcd(" + str(divisor) + "," + str(n) + ") es " + str(mcd))
+            #print(str(divisor) + " no tiene inverso, mcd(" + str(divisor) + "," + str(n) + ") es " + str(mcd))
             return None
         x3 = (pow(aux,2,n) - p1.x - p2.x) % n
         y3 = (aux * (p1.x - x3) - p1.y) % n
         #print(str(p1) + "+" + str(p2) + "=" + str(Punto(x3,y3)))
         return Punto(x3,y3) 
 
+    # define el negativo de un punto en la curva
     def __neg__(self):
         if self.inf:
             return self
         return Punto(self.x,(-self.y) % Punto.curva.n)
 
+    # define la resta de dos puntos en la curva
     def __sub__(p1, p2):
         return p1 + (-p2)
 
-    # n*p por definicion
-    def __pow__(self,n):
-        if n < 0:
-            return (-self)**(-n)
-        elif n == 0:
-            return Punto()
-        else:
-            return self + (self**(n-1))
-
-    # n*p optimizado
+    # define el producto por un entero
+    # esta optimizado para usar menos llamadas recursivas
     def __rmul__(self,n):
-        print("n = " + str(n))
         if n < 0:
             return (-n) * (-self)
         elif n == 0:
@@ -109,11 +117,19 @@ class Punto:
                 return 2 * ((n // 2) * self)
             return 2 * ((n // 2) * self) + self
 
-        
+    # devuelve verdadero si el punto pertenece a la curva de la clase
+    def esValido(self):
+        if self.inf == True:
+            return True
+        y2 = (self.y**2) % self.curva.n
+        y2p = ((self.x**3) + (self.curva.a * self.x) + self.curva.b) % self.curva.n
+        return y2 == y2p
 
-def pgpc(p,q):
-    n = Punto.curva.n
-    m = ceil(sqrt(n))
+# algoritmo paso grande paso chico para curvas
+# recibe dos puntos y el orden de la curva
+def pgpc(p,q,n):
+    m = ceil(sqrt(n)) + 1
+    print(m)
     dicc = {}
     # g = j*P
     g = Punto()
@@ -121,73 +137,16 @@ def pgpc(p,q):
         dicc[str(g)] = j
         print(str(j) + " : " + str(g))
         g = g + p  
-    mp = p**m
+    mp = m * p
     # g = i*m*P
+    print("mp = " + str(mp))
     g = Punto()
     for i in range(m):
-        print(str(i) + " : " + str(q-g))
-        value = dicc.get(str(q-g),None)
+        print(str(i) + " : " + str(q - g))
+        value = dicc.get(str(q - g),None)
         if value != None:
             print("i:" + str(i))
             print("j:" + str(value))
             return (i*m + value)%n
         g = g + mp
     
-
-print("******Ejercicio 1******")
-curva = Curva(1,9,17)
-print(curva)
-p = Punto(0,3)
-q = Punto(13,3)
-#for i in range(10):
-#    print(str(i) + "P=" + str(p**i))
-print(pgpc(p,q))
-print(p**7)
-
-#desencriptado
-a = Punto(12,7)
-b = Punto(11,12)
-print((a**(-7))+b)
-
-print("******Ejercicio 2******")
-Punto.curva = Curva(-20,21,35)
-p = Punto(15,-4)
-print(p)
-print("****3P***** Mod 35")
-print(p**3)
-print("****4P***** Mod 35")
-print(((p**2)**2))
-Punto.curva = Curva(-20,21,5)
-p = Punto(15,-4)
-print("****3P***** Mod 5")
-print(p**3)
-print("****4P***** Mod 5")
-print(p**4)
-Punto.curva = Curva(-20,21,7)
-p = Punto(15,-4)
-print("****3P***** Mod 7")
-print(p**3)
-print("****4P***** Mod 7")
-print(p**4)
-
-print("******Ejercicio 3******")
-n = 314423
-k = 666
-d = 223344
-m = 6500
-Punto.curva = Curva(217,2006,314159)
-P = Punto(123456,43989)
-Q = Punto(216438, 187612)
-_,kinv,_ = euclidesExtendido(k,n)
-G = k * P
-print("kP = " + str(G))
-r = G.x % n
-print("r = " + str(r))
-s = (kinv * (m + r * d)) % n
-print("s = " + str(s))
-_,sinv,_ = euclidesExtendido(s,n)
-u1 = (sinv * m ) % n 
-u2 = (sinv * r ) % n 
-G = (u1 * P) + (u2 * Q) 
-r = G.x % n
-print("r = " + str(r))
