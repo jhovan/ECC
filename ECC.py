@@ -44,7 +44,6 @@ class Punto:
     # constructor de la clase
     # si se omiten las coordenadas, devuelve un punto en el infinito
     def __init__(self,x = None, y = None):
-        n =  Punto.curva.n 
         self.x = x 
         self.y =  y 
         self.inf = True if (x == None or y == None) else False
